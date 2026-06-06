@@ -1,0 +1,277 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Imagen - SOY</title>
+    <!-- Librería html2canvas para generar la descarga en alta definición -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Fuentes de Google Fonts con el estilo grueso, redondeado y llamativo de la imagen original -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Fredoka:wght@700&family=Chewy&family=Luckiest+Guy&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #143384;
+            --bg-gray: #f3f4f6;
+            --panel-bg: #ffffff;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-gray);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            max-width: 1050px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Panel de Controles Lateral */
+        .controls-panel {
+            background: var(--panel-bg);
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .controls-panel h2 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .input-group input[type="text"], 
+        .input-group select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+            color: #1f2937;
+        }
+
+        .input-group input[type="text"]:focus, 
+        .input-group select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(20, 51, 132, 0.15);
+        }
+
+        /* Botón de Descarga Principal */
+        .btn-download {
+            width: 100%;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(20, 51, 132, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn-download:hover {
+            background-color: #0d2461;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(20, 51, 132, 0.3);
+        }
+
+        .btn-download:active {
+            transform: translateY(1px);
+        }
+
+        /* Área de Previsualización de la Tarjeta */
+        .preview-area {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #poster-container {
+            position: relative;
+            width: 100%;
+            display: block;
+        }
+
+        #poster-bg {
+            width: 100%;
+            display: block;
+            height: auto;
+        }
+
+        /* Capa de Texto Absoluta sobre el espacio blanco */
+        #text-overlay {
+            position: absolute;
+            top: 16.5%;     /* Centrado óptimo vertical debajo de "SOY" */
+            left: 10%;      /* Márgenes laterales limpios */
+            width: 80%;     /* Ancho contenedor del texto */
+            height: 21%;    /* Alto total del espacio en blanco */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #143384; /* Azul corporativo idéntico al de la imagen */
+            line-height: 1.15;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-transform: uppercase; /* Forzar mayúsculas estilo diseño original */
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- PANEL DE CONTROL IZQUIERDO -->
+        <div class="controls-panel">
+            <h2>Personalizador</h2>
+            
+            <div class="input-group">
+                <label for="text-input">Texto interno (Espacio Blanco):</label>
+                <input type="text" id="text-input" placeholder="UN LÍDER COMPROMETIDO" value="UN APASIONADO POR EL CAMBIO">
+            </div>
+
+            <div class="input-group">
+                <label for="font-select">Estilo de Letra (Tipografía):</label>
+                <select id="font-select">
+                    <!-- Chewy ahora es la fuente por defecto -->
+                    <option value="'Chewy', cursive" selected>Chewy (Estilo Marcador)</option>
+                    <option value="'Titan One', sans-serif">Titan One (Gruesa)</option>
+                    <option value="'Fredoka', sans-serif">Fredoka Bold</option>
+                    <option value="'Luckiest Guy', cursive">Luckiest Guy</option>
+                </select>
+            </div>
+
+            <button id="btn-descargar" class="btn-download">Descargar Imagen Final</button>
+        </div>
+
+        <!-- ÁREA DE RENDERIZADO DERECHA -->
+        <div class="preview-area">
+            <div id="poster-container">
+                <!-- Carga automática del archivo bg.png proporcionado -->
+                <img id="poster-bg" src="bg.png" alt="Fondo de la Imagen" onerror="this.src='166. Colombia territorio de.pdf (1).png';">
+                <div id="text-overlay"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const textOverlay = document.getElementById('text-overlay');
+        const fontSelect = document.getElementById('font-select');
+        const posterBg = document.getElementById('poster-bg');
+        const btnDescargar = document.getElementById('btn-descargar');
+
+        // Función principal para actualizar contenido y tipografía
+        function updatePoster() {
+            textOverlay.innerText = textInput.value;
+            textOverlay.style.fontFamily = fontSelect.value;
+            adjustFontSize();
+        }
+
+        // Algoritmo de reducción dinámica inteligente (Auto-shrink)
+        function adjustFontSize() {
+            let fontSize = 65; // Tamaño de fuente inicial (ideal para textos cortos)
+            textOverlay.style.fontSize = fontSize + 'px';
+
+            // Reduce de 1px en 1px velozmente mientras el texto exceda la caja contenedora
+            while (
+                (textOverlay.scrollHeight > textOverlay.clientHeight || textOverlay.scrollWidth > textOverlay.clientWidth) 
+                && fontSize > 12
+            ) {
+                fontSize -= 1;
+                textOverlay.style.fontSize = fontSize + 'px';
+            }
+        }
+
+        // Eventos en tiempo real
+        textInput.addEventListener('input', updatePoster);
+        fontSelect.addEventListener('change', updatePoster);
+
+        // Manejador de descargas limpias en formato PNG
+        function downloadImage() {
+            // Aseguramos que todas las tipografías web externas estén totalmente cargadas
+            document.fonts.ready.then(function() {
+                html2canvas(document.getElementById('poster-container'), {
+                    scale: 3, // Multiplica la resolución por 3 para calidad de imprenta/alta definición
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'Soy-' + textInput.value.trim().replace(/\s+/g, '-') + '.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }).catch(err => {
+                    alert("Error generando el archivo de descarga de imagen.");
+                    console.error(err);
+                });
+            });
+        }
+
+        btnDescargar.addEventListener('click', downloadImage);
+
+        // Inicialización coordinada al cargar la página y sus fuentes
+        window.addEventListener('load', () => {
+            document.fonts.ready.then(updatePoster);
+        });
+        
+        // Re-ejecutar por si las imágenes cargan lento
+        posterBg.onload = updatePoster;
+    </script>
+
+</body>
+</html>
